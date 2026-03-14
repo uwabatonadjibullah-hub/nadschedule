@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nadjibullah | Master Dashboard</title>
+    
+    <!-- Favicons & Manifest -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="shortcut icon" href="favicon.ico">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -69,6 +77,31 @@
         .type-job { background-color: rgba(51, 65, 85, 0.9); border-left: 4px solid #94a3b8; }
         .type-prayer { background-color: rgba(22, 163, 74, 0.9); border-left: 4px solid #4ade80; }
         .type-general { background-color: rgba(194, 65, 12, 0.9); border-left: 4px solid #fb923c; }
+
+        /* --- MOBILE FIXES --- */
+        @media (max-width: 768px) {
+            #view-today {
+                display: block !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            #daily-timeline {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                min-height: 300px;
+            }
+            
+            /* Ensure the timeline items are visible */
+            #daily-timeline > div {
+                display: block !important;
+            }
+
+            .view-panel.active #daily-timeline {
+                display: block !important;
+            }
+        }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
@@ -148,7 +181,7 @@
         <!-- Weekly View Button -->
         <div class="p-4 border-t border-slate-800 shrink-0 hide-on-collapse">
             <button onclick="navigateTo('view-weekly')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-lg flex items-center justify-center transition shadow-lg border border-slate-600">
-                <i class="fas fa-table mr-2"></i> View Excel Schedule
+                <i class="fas fa-table mr-2"></i> WEEKLY Schedule
             </button>
         </div>
     </aside>
@@ -560,6 +593,21 @@
             return h * 60 + m;
         }
 
+        function handleMobileRendering() {
+            // Force re-render of timeline when switching to mobile
+            renderTimeline();
+            
+            // Adjust any mobile-specific layout issues
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                // Ensure the timeline container is visible
+                const timelineContainer = document.getElementById('daily-timeline');
+                if (timelineContainer) {
+                    timelineContainer.style.minHeight = 'auto';
+                }
+            }
+        }
+
         function initApp() {
             checkAndResetWeeklyStats();
             updateClock();
@@ -569,10 +617,24 @@
             checkSchedule();
             setInterval(checkSchedule, 10000); // Check every 10s
             
-            renderTimeline();
+            renderTimeline(); // Initial render
+            
+            // Ensure timeline renders after all content is loaded
+            setTimeout(renderTimeline, 100);
+
             const currentWeek = getCurrentWeekNumber();
             setWeek(currentWeek); 
             updateNavButtons();
+
+            // Add resize listener for responsive updates
+            window.addEventListener('resize', function() {
+                handleMobileRendering();
+            });
+            
+            // Handle orientation change on mobile
+            window.addEventListener('orientationchange', function() {
+                setTimeout(handleMobileRendering, 200);
+            });
         }
 
         function updateClock() {
@@ -620,6 +682,13 @@
         function switchView(viewId) {
             document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
+            
+            // Re-render timeline when switching to today view
+            if (viewId === 'view-today') {
+                // Small delay to ensure DOM is ready
+                setTimeout(renderTimeline, 50);
+            }
+
             updateNavButtons();
             if(window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.remove('sidebar-expanded');
@@ -635,11 +704,15 @@
         // --- TODAY RENDERING ---
         function renderTimeline() {
             const container = document.getElementById('daily-timeline');
+            if (!container) return; // Guard clause added
+
             const today = getTodaySchedule();
             container.innerHTML = '<div class="timeline-line"></div>';
 
             const now = new Date();
             const currentMins = now.getHours() * 60 + now.getMinutes();
+            // Check if we're on mobile
+            const isMobile = window.innerWidth <= 768;
 
             today.forEach((session) => {
                 const startMins = timeToMins(session.start);
@@ -669,6 +742,12 @@
                     </div>
                 `;
             });
+
+            // Ensure container is visible on mobile
+            if (isMobile) {
+                container.style.display = 'block';
+                container.style.visibility = 'visible';
+            }
         }
 
         // --- EXCEL GRID RENDERING ---
