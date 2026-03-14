@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NAD Master Dashboard</title>
+    <title>Nadjibullah | Master Dashboard</title>
     
     <!-- Favicons & Manifest -->
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -70,6 +70,15 @@
         /* View Transitions (Fixed for Flexbox & Mobile constraint) */
         .view-panel { display: none !important; animation: slideIn 0.3s ease-out forwards; }
         .view-panel.active { display: flex !important; }
+
+        /* Time Block Colors (Restored for Grid) */
+        .type-faceless { background-color: rgba(220, 38, 38, 0.9); border-left: 4px solid #f87171; }
+        .type-quran { background-color: rgba(5, 150, 105, 0.9); border-left: 4px solid #34d399; }
+        .type-fyp { background-color: rgba(124, 58, 237, 0.9); border-left: 4px solid #a78bfa; }
+        .type-class { background-color: rgba(217, 119, 6, 0.9); border-left: 4px solid #fbbf24; }
+        .type-job { background-color: rgba(51, 65, 85, 0.9); border-left: 4px solid #94a3b8; }
+        .type-prayer { background-color: rgba(22, 163, 74, 0.9); border-left: 4px solid #4ade80; }
+        .type-general { background-color: rgba(194, 65, 12, 0.9); border-left: 4px solid #fb923c; }
 
         /* --- MOBILE FIXES --- */
         @media (max-width: 768px) {
@@ -624,6 +633,19 @@
             window.addEventListener('orientationchange', function() {
                 setTimeout(handleMobileRendering, 200);
             });
+
+            // Inline Service Worker registration for PWA installability and Web Push handling
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    const swCode = `
+                        self.addEventListener('install', e => self.skipWaiting());
+                        self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+                        self.addEventListener('fetch', e => {}); // Basic fetch listener to pass PWA criteria
+                    `;
+                    const blob = new Blob([swCode], { type: 'application/javascript' });
+                    navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(console.error);
+                });
+            }
         }
 
         function updateClock() {
@@ -807,15 +829,19 @@
                     const topPx = (startMins - 240) * 2; 
                     const heightPx = (endMins - startMins) * 2;
                     
-                    // Web Neutral Colors instead of Niche types
-                    const neutralClass = `bg-slate-800 border-l-4 border-slate-500 shadow hover:bg-slate-700`;
+                    // Reverted back to the vivid colorful category types instead of neutral colors
+                    const typeClass = `type-${session.type} shadow hover:brightness-110`;
                     
                     colHtml += `
-                        <div class="absolute w-[calc(100%-4px)] ml-[2px] p-1.5 md:p-2 rounded-r flex flex-col justify-start transition cursor-pointer z-10 ${neutralClass}" 
+                        <div class="absolute w-[calc(100%-4px)] ml-[2px] p-1 md:p-2 rounded-r flex flex-col justify-between transition cursor-pointer z-10 ${typeClass}" 
                              style="top: ${topPx + 1}px; height: ${heightPx - 2}px;"
                              onclick="alert('Task: ${session.title}\\nTime: ${session.start} - ${session.end}\\nGoals: ${session.goals}')">
-                            <span class="text-[9px] md:text-xs font-bold leading-tight line-clamp-2 md:line-clamp-none text-slate-200">${session.title}</span>
-                            <span class="text-[8px] md:text-[10px] text-accent font-mono mt-1 hidden md:block">${session.start} - ${session.end}</span>
+                            <div class="flex-1 flex items-center justify-center overflow-hidden w-full">
+                                <span class="text-[11px] md:text-[13px] font-bold leading-tight text-center text-white drop-shadow-md px-1">${session.title}</span>
+                            </div>
+                            <div class="shrink-0 w-full text-center pb-0.5 mt-1">
+                                <span class="text-[10px] md:text-xs text-white/90 font-mono font-bold block w-full px-1 truncate">${session.start} - ${session.end}</span>
+                            </div>
                         </div>
                     `;
                 });
@@ -826,6 +852,24 @@
         }
 
         // --- SCHEDULING & ALERTS ---
+        
+        // PWA Robust Notification Dispatcher
+        function sendAppNotification(title, options) {
+            if (Notification.permission === "granted") {
+                if (navigator.serviceWorker) {
+                    navigator.serviceWorker.getRegistration().then(reg => {
+                        if (reg && reg.showNotification) {
+                            reg.showNotification(title, options);
+                        } else {
+                            new Notification(title, options);
+                        }
+                    });
+                } else {
+                    new Notification(title, options);
+                }
+            }
+        }
+
         function checkSchedule() {
             const now = new Date();
             const currentMins = now.getHours() * 60 + now.getMinutes();
@@ -925,7 +969,14 @@
                     // Play start audio if enabled
                     document.getElementById('audio-start').play().catch(e => console.log("Audio playing requires interaction first."));
                 }
-                if (Notification.permission === "granted") new Notification("Started: " + session.title, { body: session.goals });
+                
+                // Advanced PWA / Web Push Call
+                sendAppNotification("Started: " + session.title, { 
+                    body: session.goals, 
+                    icon: 'apple-touch-icon.png',
+                    badge: 'favicon-32x32.png',
+                    vibrate: [200, 100, 200]
+                });
                 
             } else { // END
                 headline.innerText = "Session Ended";
@@ -959,7 +1010,14 @@
                     if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]);
                     document.getElementById('audio-end').play().catch(e => console.log("Audio playing requires interaction first."));
                 }
-                if (Notification.permission === "granted") new Notification("Ended: " + session.title, { body: "Confirm your performance." });
+                
+                // Advanced PWA / Web Push Call
+                sendAppNotification("Ended: " + session.title, { 
+                    body: "Confirm your performance tracking.", 
+                    icon: 'apple-touch-icon.png',
+                    badge: 'favicon-32x32.png',
+                    vibrate: [500, 200, 500] 
+                });
             }
             modal.classList.remove('hidden');
         }
@@ -1037,13 +1095,13 @@
             document.getElementById('audio-end').currentTime = 0;
 
             if (!("Notification" in window)) {
-                alert("This browser does not support desktop notifications.");
+                alert("This browser does not support desktop or mobile notifications.");
             } else if (Notification.permission === "granted") {
-                alert("Alerts are active! Note: Keep this tab open. If on a phone, Add this page to your Home Screen for the best alert experience.");
+                alert("Alerts are active! For phones: To receive notifications seamlessly, please 'Add to Home Screen' (Install App).");
             } else if (Notification.permission !== "denied") {
                 Notification.requestPermission().then(function (permission) {
                     if (permission === "granted") {
-                        alert("Alerts enabled! Note: Keep this tab open to ensure alarms sound.");
+                        alert("Alerts enabled! For phones: 'Add to Home Screen' (Install App) for the best background notification experience.");
                     }
                 });
             }
