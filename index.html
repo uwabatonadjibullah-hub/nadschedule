@@ -157,16 +157,21 @@
                 </div>
 
                 <div class="hidden md:block ml-4">
-                    <h2 class="text-lg md:text-xl font-bold" id="current-date">Loading...</h2>
+                    <h2 class="text-lg md:text-xl font-bold flex items-center gap-2">
+                        <span id="current-date">Loading...</span> 
+                        <span id="current-week-badge" class="bg-accent/20 text-accent text-xs px-2 py-0.5 rounded-full border border-accent/30 font-mono"></span>
+                    </h2>
                     <p class="text-accent text-xs md:text-sm font-mono" id="current-time">Loading...</p>
                 </div>
             </div>
 
             <div class="flex items-center space-x-2 md:space-x-4">
-                <button onclick="requestNotificationPermission()" class="hidden sm:flex text-xs bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/30 px-3 py-1.5 rounded items-center transition">
-                    <i class="fas fa-bell mr-2"></i> Enable Alerts
+                <button onclick="requestNotificationPermission()" class="flex text-[10px] md:text-xs bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/30 px-2 md:px-3 py-1.5 rounded items-center transition">
+                    <i class="fas fa-bell mr-1 md:mr-2"></i> 
+                    <span class="hidden sm:inline">Enable Alerts</span>
+                    <span class="sm:hidden">Alerts</span>
                 </button>
-                <div class="h-8 w-8 md:h-10 md:w-10 rounded-full bg-gradient-to-tr from-accent to-success flex items-center justify-center font-bold text-white shadow-lg">
+                <div class="h-8 w-8 md:h-10 md:w-10 rounded-full bg-gradient-to-tr from-accent to-success flex items-center justify-center font-bold text-white shadow-lg shrink-0">
                     N
                 </div>
             </div>
@@ -192,7 +197,10 @@
 
         <!-- View: Weekly Schedule -->
         <div id="view-weekly" class="view-panel flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
-            <h2 class="text-2xl font-bold mb-6">6-Week Master Plan</h2>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h2 class="text-2xl font-bold mb-2 md:mb-0">6-Week Master Plan</h2>
+                <span class="text-slate-400 text-sm"><i class="fas fa-flag mr-1"></i> Phase 1 Start: Mar 16, 2026</span>
+            </div>
             
             <!-- Week Tabs -->
             <div class="flex overflow-x-auto custom-scrollbar pb-2 mb-6 space-x-2">
@@ -214,7 +222,7 @@
 
     <!-- Notification Modal Overlay (Start / End & Tracking) -->
     <div id="notification-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-panel bg-darker w-full max-w-lg rounded-2xl shadow-2xl border border-accent/50 p-6 animate-slide-in relative overflow-hidden">
+        <div class="glass-panel bg-darker w-full max-w-2xl rounded-2xl shadow-2xl border border-accent/50 p-6 animate-slide-in relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-2" id="modal-top-bar"></div>
             
             <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
@@ -222,11 +230,11 @@
             </button>
             
             <div class="flex items-center mb-6 mt-2">
-                <div id="modal-icon-bg" class="w-14 h-14 rounded-full flex items-center justify-center text-2xl mr-4 shadow-lg">
+                <div id="modal-icon-bg" class="w-14 h-14 shrink-0 rounded-full flex items-center justify-center text-2xl mr-4 shadow-lg">
                     <i id="modal-icon" class="fas fa-bell"></i>
                 </div>
                 <div>
-                    <h3 class="text-2xl font-bold text-white" id="modal-headline">Alert</h3>
+                    <h3 class="text-xl md:text-2xl font-bold text-white" id="modal-headline">Alert</h3>
                     <p class="text-accent text-sm font-mono" id="modal-time">00:00</p>
                 </div>
             </div>
@@ -237,14 +245,18 @@
                     <p class="text-xl font-bold text-white" id="modal-title">Task Title</p>
                 </div>
                 
-                <div id="modal-details" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div id="modal-details" class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div class="bg-emerald-900/20 p-3 rounded-lg border border-emerald-500/20">
-                        <h4 class="text-xs text-emerald-400 uppercase font-bold mb-1"><i class="fas fa-bullseye"></i> Objective</h4>
+                        <h4 class="text-xs text-emerald-400 uppercase font-bold mb-1"><i class="fas fa-bullseye mr-1"></i> Objective</h4>
                         <p class="text-sm text-slate-200" id="modal-goals">Goals</p>
                     </div>
                     <div class="bg-blue-900/20 p-3 rounded-lg border border-blue-500/20">
-                        <h4 class="text-xs text-blue-400 uppercase font-bold mb-1"><i class="fas fa-arrow-up"></i> Impact</h4>
+                        <h4 class="text-xs text-blue-400 uppercase font-bold mb-1"><i class="fas fa-arrow-up mr-1"></i> Positive Impact</h4>
                         <p class="text-sm text-slate-200" id="modal-impact">Impact</p>
+                    </div>
+                    <div class="bg-red-900/20 p-3 rounded-lg border border-red-500/20">
+                        <h4 class="text-xs text-red-400 uppercase font-bold mb-1"><i class="fas fa-arrow-down mr-1"></i> Negative Impact</h4>
+                        <p class="text-sm text-slate-200" id="modal-missImpact">Miss Impact</p>
                     </div>
                 </div>
 
@@ -273,107 +285,140 @@
     <audio id="audio-end" src="https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3" preload="auto"></audio>
 
     <script>
-        // --- DATA STRUCTURE ---
+        // --- DATA STRUCTURE (Enriched with Miss Impact) ---
         const scheduleData = {
             1: [ // MONDAY
-                { start: "04:00", end: "05:00", title: "Wake Up & Tahajjud", goals: "Spiritual connection, Suhoor for Fasting", impact: "High energy, immense blessings.", quote: "The early morning has gold in its mouth." },
-                { start: "05:00", end: "06:30", title: "Fajr, FYP II & Faceless Batching", goals: "Pray Fajr. Execute Phase 1 Scripts.", impact: "Stay ahead of YouTube algorithm.", quote: "Procrastination is the thief of time." },
-                { start: "06:30", end: "09:00", title: "Commute to Kigali", goals: "Listen to Zad Academy audio.", impact: "Utilize dead time.", quote: "Action is the foundational key to all success." },
-                { start: "09:00", end: "10:30", title: "Self-Study & Faceless Empire", goals: "Review notes, generate AI assets.", impact: "Maximize university free slots.", quote: "Your future is created by what you do today." },
-                { start: "10:30", end: "12:30", title: "JOB: KSP Rwanda (Filmmaking)", goals: "Train trainees on scripts/storyboards.", impact: "Fulfill job duties.", quote: "Make it hot by striking." },
-                { start: "12:30", end: "14:30", title: "Dhuhr & Break/Prep", goals: "Pray Dhuhr, organize afternoon tasks.", impact: "Re-centered mind.", quote: "To think is easy. To act is hard." },
-                { start: "14:30", end: "16:30", title: "JOB: KSP Rwanda (Digital Literacy)", goals: "Deliver tech training.", impact: "Solidify tech foundations.", quote: "Do not evade responsibility today." },
-                { start: "16:30", end: "17:30", title: "Asr & Wrap Up", goals: "Pray Asr, finalize tasks.", impact: "Clean desk, clean mind.", quote: "Someday is not a day of the week." },
-                { start: "17:30", end: "19:30", title: "Commute Home & Maghrib", goals: "Break fast, pray Maghrib.", impact: "Physical nourishment.", quote: "Well done is better than well said." },
-                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Pray Isha, eat dinner.", impact: "Preparation for deep work.", quote: "Discipline is the bridge to goals." },
-                { start: "20:00", end: "21:45", title: "Quran Memorization", goals: "Memorize Juzz 29/30.", impact: "Eternal reward, sharp memory.", quote: "Learn the Quran and teach it." },
-                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Wind down, sleep by 10:30 PM.", impact: "Guarantee a 4:00 AM wake up.", quote: "Sleep well to fight well." }
+                { start: "04:00", end: "05:00", title: "Wake Up & Tahajjud", goals: "Spiritual connection, Suhoor for Fasting", impact: "High energy, immense blessings.", missImpact: "Brain fog, missed spiritual anchor.", quote: "The early morning has gold in its mouth." },
+                { start: "05:00", end: "06:30", title: "Fajr, FYP II & Faceless Batching", goals: "Pray Fajr. Execute Phase 1 Scripts.", impact: "Stay ahead of YouTube algorithm.", missImpact: "Fall behind on the 25 uploads/week schedule.", quote: "Procrastination is the thief of time." },
+                { start: "06:30", end: "09:00", title: "Commute to Kigali", goals: "Listen to Zad Academy audio.", impact: "Utilize dead time.", missImpact: "Wasted hours in transit.", quote: "Action is the foundational key to all success." },
+                { start: "09:00", end: "10:30", title: "Self-Study & Faceless Empire", goals: "Review notes, generate AI assets.", impact: "Maximize university free slots.", missImpact: "Stressful evenings trying to catch up.", quote: "Your future is created by what you do today." },
+                { start: "10:30", end: "12:30", title: "JOB: KSP Rwanda (Filmmaking)", goals: "Train trainees on scripts/storyboards.", impact: "Fulfill job duties.", missImpact: "Poor student performance, reputation hit.", quote: "Make it hot by striking." },
+                { start: "12:30", end: "14:30", title: "Dhuhr & Break/Prep", goals: "Pray Dhuhr, organize afternoon tasks.", impact: "Re-centered mind.", missImpact: "Afternoon burnout and spiritual deficit.", quote: "To think is easy. To act is hard." },
+                { start: "14:30", end: "16:30", title: "JOB: KSP Rwanda (Digital Literacy)", goals: "Deliver tech training.", impact: "Solidify tech foundations.", missImpact: "Students lag behind in modern skills.", quote: "Do not evade responsibility today." },
+                { start: "16:30", end: "17:30", title: "Asr & Wrap Up", goals: "Pray Asr, finalize tasks.", impact: "Clean desk, clean mind.", missImpact: "Carrying today's stress into tomorrow.", quote: "Someday is not a day of the week." },
+                { start: "17:30", end: "19:30", title: "Commute Home & Maghrib", goals: "Break fast, pray Maghrib.", impact: "Physical nourishment.", missImpact: "Fatigue and missed obligations.", quote: "Well done is better than well said." },
+                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Pray Isha, eat dinner.", impact: "Preparation for deep work.", missImpact: "Sluggishness during Quran study.", quote: "Discipline is the bridge to goals." },
+                { start: "20:00", end: "21:45", title: "Quran Memorization", goals: "Memorize Juzz 29/30.", impact: "Eternal reward, sharp memory.", missImpact: "Heart disconnected from the Quran.", quote: "Learn the Quran and teach it." },
+                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Wind down, sleep by 10:30 PM.", impact: "Guarantee a 4:00 AM wake up.", missImpact: "Destroy tomorrow's schedule completely.", quote: "Sleep well to fight well." }
             ],
             2: [ // TUESDAY
-                { start: "04:00", end: "05:00", title: "Wake Up & Tahajjud", goals: "Spiritual connection", impact: "High energy, blessings.", quote: "Wake up with determination." },
-                { start: "05:00", end: "06:30", title: "Fajr, FYP II & Faceless Batching", goals: "Pray Fajr. Execute Phase 1 audio.", impact: "Stay ahead of algorithm.", quote: "Procrastination is the thief of time." },
-                { start: "06:30", end: "09:00", title: "Commute to Kigali", goals: "Listen to podcasts/Quran.", impact: "Continuous learning.", quote: "Action is the foundational key." },
-                { start: "09:00", end: "10:30", title: "Self-Study & Faceless Empire", goals: "Edit videos, prepare uploads.", impact: "Maximize free slots.", quote: "Your future is created today." },
-                { start: "10:30", end: "12:30", title: "JOB: KSP Rwanda (Filmmaking)", goals: "Trainee script practice.", impact: "Fulfill job duties.", quote: "Strike the iron." },
-                { start: "12:30", end: "14:30", title: "Dhuhr & Break", goals: "Pray Dhuhr, organize.", impact: "Re-centered mind.", quote: "To act is hard." },
-                { start: "14:30", end: "16:30", title: "JOB: KSP Rwanda (Digital Literacy)", goals: "Tech training.", impact: "Solidify tech foundations.", quote: "Own your responsibility." },
-                { start: "16:30", end: "17:30", title: "Asr & Wrap Up", goals: "Pray Asr, wrap up.", impact: "Clean mind.", quote: "Finish strong." },
-                { start: "17:30", end: "19:30", title: "Commute Home & Maghrib", goals: "Travel, pray.", impact: "Safe return.", quote: "Endure the journey." },
-                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Pray, eat.", impact: "Prep for deep work.", quote: "Fuel the machine." },
-                { start: "20:00", end: "21:45", title: "Quran Memorization", goals: "Memorize Juzz 29/30.", impact: "Fulfilling life goal.", quote: "Read and rise." },
-                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Sleep by 10:30 PM.", impact: "Guarantee 4:00 AM wake up.", quote: "Rest up." }
+                { start: "04:00", end: "05:00", title: "Wake Up & Tahajjud", goals: "Spiritual connection", impact: "High energy, blessings.", missImpact: "Start day rushed and lethargic.", quote: "Wake up with determination." },
+                { start: "05:00", end: "06:30", title: "Fajr, FYP II & Faceless Batching", goals: "Pray Fajr. Execute Phase 1 audio.", impact: "Stay ahead of algorithm.", missImpact: "Fall behind on YouTube schedule.", quote: "Procrastination is the thief of time." },
+                { start: "06:30", end: "09:00", title: "Commute to Kigali", goals: "Listen to podcasts/Quran.", impact: "Continuous learning.", missImpact: "Wasted transit time.", quote: "Action is the foundational key." },
+                { start: "09:00", end: "10:30", title: "Self-Study & Faceless Empire", goals: "Edit videos, prepare uploads.", impact: "Maximize free slots.", missImpact: "Stressful evenings to catch up.", quote: "Your future is created today." },
+                { start: "10:30", end: "12:30", title: "JOB: KSP Rwanda (Filmmaking)", goals: "Trainee script practice.", impact: "Fulfill job duties.", missImpact: "Students fall behind schedule.", quote: "Strike the iron." },
+                { start: "12:30", end: "14:30", title: "Dhuhr & Break", goals: "Pray Dhuhr, organize.", impact: "Re-centered mind.", missImpact: "Afternoon burnout.", quote: "To act is hard." },
+                { start: "14:30", end: "16:30", title: "JOB: KSP Rwanda (Digital Literacy)", goals: "Tech training.", impact: "Solidify tech foundations.", missImpact: "Students lack required IT skills.", quote: "Own your responsibility." },
+                { start: "16:30", end: "17:30", title: "Asr & Wrap Up", goals: "Pray Asr, wrap up.", impact: "Clean mind.", missImpact: "Carry stress into the evening.", quote: "Finish strong." },
+                { start: "17:30", end: "19:30", title: "Commute Home & Maghrib", goals: "Travel, pray.", impact: "Safe return.", missImpact: "Missed obligations.", quote: "Endure the journey." },
+                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Pray, eat.", impact: "Prep for deep work.", missImpact: "Sluggishness.", quote: "Fuel the machine." },
+                { start: "20:00", end: "21:45", title: "Quran Memorization", goals: "Memorize Juzz 29/30.", impact: "Fulfilling life goal.", missImpact: "Disconnected heart.", quote: "Read and rise." },
+                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Sleep by 10:30 PM.", impact: "Guarantee 4:00 AM wake up.", missImpact: "Destroy tomorrow's schedule.", quote: "Rest up." }
             ],
             3: [ // WEDNESDAY
-                { start: "04:00", end: "05:00", title: "Wake Up & Tahajjud", goals: "Spiritual connection.", impact: "Peaceful mind.", quote: "Win the morning, win the day." },
-                { start: "05:00", end: "06:30", title: "Fajr, FYP II & Faceless", goals: "Fajr. Art Generation.", impact: "Hit 25 video quota.", quote: "Consistency is key." },
-                { start: "06:30", end: "09:00", title: "Commute to Kigali", goals: "Review Occ. Safety notes.", impact: "Prep for class.", quote: "Preparation is everything." },
-                { start: "09:00", end: "10:30", title: "Self-Study & Faceless", goals: "Finalize FYP simulation data.", impact: "Near 90% completion.", quote: "Do the hard work." },
-                { start: "10:30", end: "12:30", title: "JOB: KSP Rwanda (Filmmaking)", goals: "Teach Camera Operations.", impact: "Trainees ready for April film.", quote: "Lead by example." },
-                { start: "12:30", end: "14:00", title: "Dhuhr & Lunch", goals: "Pray Dhuhr, refuel.", impact: "Energy for class.", quote: "Take care of your body." },
-                { start: "14:00", end: "17:00", title: "Class: Occ. Safety", goals: "Attend class. Aim >85%.", impact: "High academic standing.", quote: "Excellence is a habit." },
-                { start: "17:00", end: "18:00", title: "Wrap Up & Asr", goals: "Final notes review.", impact: "Retention of knowledge.", quote: "Review equals retention." },
-                { start: "18:00", end: "19:30", title: "Commute Home & Maghrib", goals: "Travel, pray.", impact: "Safe return.", quote: "Patience pays off." },
-                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Pray, eat.", impact: "Prep for Quran.", quote: "Replenish." },
-                { start: "20:00", end: "21:45", title: "Quran Memorization", goals: "Memorize Juzz 29/30.", impact: "Spiritual elevation.", quote: "Read and rise." },
-                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Sleep by 10:30.", impact: "Ready for Thursday.", quote: "Rest is a weapon." }
+                { start: "04:00", end: "05:00", title: "Wake Up & Tahajjud", goals: "Spiritual connection.", impact: "Peaceful mind.", missImpact: "Lethargic start.", quote: "Win the morning, win the day." },
+                { start: "05:00", end: "06:30", title: "Fajr, FYP II & Faceless", goals: "Fajr. Art Generation.", impact: "Hit 25 video quota.", missImpact: "Algorithm drops channel reach.", quote: "Consistency is key." },
+                { start: "06:30", end: "09:00", title: "Commute to Kigali", goals: "Review Occ. Safety notes.", impact: "Prep for class.", missImpact: "Unprepared for lecture.", quote: "Preparation is everything." },
+                { start: "09:00", end: "10:30", title: "Self-Study & Faceless", goals: "Finalize FYP simulation data.", impact: "Near 90% completion.", missImpact: "Stagnant FYP progress.", quote: "Do the hard work." },
+                { start: "10:30", end: "12:30", title: "JOB: KSP Rwanda (Filmmaking)", goals: "Teach Camera Operations.", impact: "Trainees ready for April film.", missImpact: "Students unable to shoot film.", quote: "Lead by example." },
+                { start: "12:30", end: "14:00", title: "Dhuhr & Lunch", goals: "Pray Dhuhr, refuel.", impact: "Energy for class.", missImpact: "Exhaustion and lack of focus.", quote: "Take care of your body." },
+                { start: "14:00", end: "17:00", title: "Class: Occ. Safety", goals: "Attend class. Aim >85%.", impact: "High academic standing.", missImpact: "Drop in GPA, poor graduation.", quote: "Excellence is a habit." },
+                { start: "17:00", end: "18:00", title: "Wrap Up & Asr", goals: "Final notes review.", impact: "Retention of knowledge.", missImpact: "Forgetting the lecture entirely.", quote: "Review equals retention." },
+                { start: "18:00", end: "19:30", title: "Commute Home & Maghrib", goals: "Travel, pray.", impact: "Safe return.", missImpact: "Missed prayer time.", quote: "Patience pays off." },
+                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Pray, eat.", impact: "Prep for Quran.", missImpact: "Tiredness.", quote: "Replenish." },
+                { start: "20:00", end: "21:45", title: "Quran Memorization", goals: "Memorize Juzz 29/30.", impact: "Spiritual elevation.", missImpact: "Stuck in progress.", quote: "Read and rise." },
+                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Sleep by 10:30.", impact: "Ready for Thursday.", missImpact: "Ruins tomorrow completely.", quote: "Rest is a weapon." }
             ],
             4: [ // THURSDAY
-                { start: "04:00", end: "05:00", title: "Wake Up & Tahajjud", goals: "Spiritual connection, Suhoor.", impact: "Blessings for fasting.", quote: "Fasting is a shield." },
-                { start: "05:00", end: "06:30", title: "Fajr & FYP II", goals: "Fajr. Write FYP Report.", impact: "Documentation up to date.", quote: "Write it down." },
-                { start: "06:30", end: "09:00", title: "Commute to Campus", goals: "Mental prep for class.", impact: "Focus.", quote: "Focus the mind." },
-                { start: "09:00", end: "12:00", title: "Class: Non-destructive testing", goals: "Attend class. >85% target.", impact: "Master core concepts.", quote: "Pay attention." },
-                { start: "12:00", end: "14:00", title: "Dhuhr & Break", goals: "Pray Dhuhr.", impact: "Rest before next class.", quote: "Pause and pray." },
-                { start: "14:00", end: "17:00", title: "Class: Adv. Machining", goals: "Attend class.", impact: "Complete syllabus knowledge.", quote: "Finish strong." },
-                { start: "17:00", end: "17:30", title: "Wrap up", goals: "Organize notes.", impact: "Clean transition.", quote: "Organize." },
-                { start: "17:30", end: "19:30", title: "Commute Home & Maghrib", goals: "Break fast, pray.", impact: "Reward of fasting.", quote: "Patience pays off." },
-                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Pray, eat.", impact: "Recovery.", quote: "Replenish." },
-                { start: "20:00", end: "21:45", title: "Quran & Faceless Check", goals: "Quran + schedule YouTube.", impact: "Automated income.", quote: "Balance is key." },
-                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Sleep by 10:30.", impact: "Ready for Jumu'ah.", quote: "Sleep is essential." }
+                { start: "04:00", end: "05:00", title: "Wake Up & Tahajjud", goals: "Spiritual connection, Suhoor.", impact: "Blessings for fasting.", missImpact: "Hunger, missed fasting reward.", quote: "Fasting is a shield." },
+                { start: "05:00", end: "06:30", title: "Fajr & FYP II", goals: "Fajr. Write FYP Report.", impact: "Documentation up to date.", missImpact: "Scrambling at deadline.", quote: "Write it down." },
+                { start: "06:30", end: "09:00", title: "Commute to Campus", goals: "Mental prep for class.", impact: "Focus.", missImpact: "Distraction.", quote: "Focus the mind." },
+                { start: "09:00", end: "12:00", title: "Class: Non-destructive testing", goals: "Attend class. >85% target.", impact: "Master core concepts.", missImpact: "Fail assessments.", quote: "Pay attention." },
+                { start: "12:00", end: "14:00", title: "Dhuhr & Break", goals: "Pray Dhuhr.", impact: "Rest before next class.", missImpact: "Burnout in the afternoon.", quote: "Pause and pray." },
+                { start: "14:00", end: "17:00", title: "Class: Adv. Machining", goals: "Attend class.", impact: "Complete syllabus knowledge.", missImpact: "Miss crucial exam information.", quote: "Finish strong." },
+                { start: "17:00", end: "17:30", title: "Wrap up", goals: "Organize notes.", impact: "Clean transition.", missImpact: "Chaos in study materials.", quote: "Organize." },
+                { start: "17:30", end: "19:30", title: "Commute Home & Maghrib", goals: "Break fast, pray.", impact: "Reward of fasting.", missImpact: "Delaying mandatory prayer.", quote: "Patience pays off." },
+                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Pray, eat.", impact: "Recovery.", missImpact: "Weakness.", quote: "Replenish." },
+                { start: "20:00", end: "21:45", title: "Quran & Faceless Check", goals: "Quran + schedule YouTube.", impact: "Automated income.", missImpact: "Lost revenue and reward.", quote: "Balance is key." },
+                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Sleep by 10:30.", impact: "Ready for Jumu'ah.", missImpact: "Tired for Friday.", quote: "Sleep is essential." }
             ],
             5: [ // FRIDAY
-                { start: "04:00", end: "05:00", title: "Wake Up & Tahajjud", goals: "Spiritual connection.", impact: "Friday blessings.", quote: "Friday is the master of days." },
-                { start: "05:00", end: "06:30", title: "Fajr, Surah Kahf & FYP", goals: "Read Kahf, robotic arm logic.", impact: "Light until next Friday.", quote: "Illuminate your week." },
-                { start: "06:30", end: "09:00", title: "Commute to Campus", goals: "Listen to Zad Academy prep.", impact: "Ready for assessment.", quote: "Prepare for the test." },
-                { start: "09:00", end: "12:00", title: "Class: Composite Materials", goals: "Attend class.", impact: "Subject mastery.", quote: "Learn diligently." },
-                { start: "12:00", end: "14:30", title: "Jumu'ah & Lunch", goals: "Congregational prayer.", impact: "Weekly reset.", quote: "Hasten to remembrance." },
-                { start: "14:30", end: "16:30", title: "Zad Academy Assessments", goals: "Complete Zad tests. >85%.", impact: "Pass academy.", quote: "Seek sacred knowledge." },
-                { start: "16:30", end: "18:00", title: "Asr & FYP Free Block", goals: "Pray Asr, assignments.", impact: "No weekend homework.", quote: "Clear the desk." },
-                { start: "18:00", end: "19:30", title: "Commute Home & Maghrib", goals: "Travel safely.", impact: "Relaxation begins.", quote: "Almost done." },
-                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Family time.", impact: "Strong family ties.", quote: "Family first." },
-                { start: "20:00", end: "21:45", title: "Quran Memorization", goals: "Review memorized pages.", impact: "Solidify memory.", quote: "Tie the camel." },
-                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Sleep by 10:30.", impact: "Energy for weekend.", quote: "Rest up." }
+                { start: "04:00", end: "05:00", title: "Wake Up & Tahajjud", goals: "Spiritual connection.", impact: "Friday blessings.", missImpact: "Missed grace of Friday morning.", quote: "Friday is the master of days." },
+                { start: "05:00", end: "06:30", title: "Fajr, Surah Kahf & FYP", goals: "Read Kahf, robotic arm logic.", impact: "Light until next Friday.", missImpact: "Missed sunnah, project delay.", quote: "Illuminate your week." },
+                { start: "06:30", end: "09:00", title: "Commute to Campus", goals: "Listen to Zad Academy prep.", impact: "Ready for assessment.", missImpact: "Unprepared for Islamic tests.", quote: "Prepare for the test." },
+                { start: "09:00", end: "12:00", title: "Class: Composite Materials", goals: "Attend class.", impact: "Subject mastery.", missImpact: "Lost marks.", quote: "Learn diligently." },
+                { start: "12:00", end: "14:30", title: "Jumu'ah & Lunch", goals: "Congregational prayer.", impact: "Weekly reset.", missImpact: "Major sin if missed intentionally.", quote: "Hasten to remembrance." },
+                { start: "14:30", end: "16:30", title: "Zad Academy Assessments", goals: "Complete Zad tests. >85%.", impact: "Pass academy.", missImpact: "Fail the Islamic course.", quote: "Seek sacred knowledge." },
+                { start: "16:30", end: "18:00", title: "Asr & FYP Free Block", goals: "Pray Asr, assignments.", impact: "No weekend homework.", missImpact: "Stressed, homework-filled weekend.", quote: "Clear the desk." },
+                { start: "18:00", end: "19:30", title: "Commute Home & Maghrib", goals: "Travel safely.", impact: "Relaxation begins.", missImpact: "None.", quote: "Almost done." },
+                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Family time.", impact: "Strong family ties.", missImpact: "Isolation.", quote: "Family first." },
+                { start: "20:00", end: "21:45", title: "Quran Memorization", goals: "Review memorized pages.", impact: "Solidify memory.", missImpact: "Forgetting what was learned.", quote: "Tie the camel." },
+                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Sleep by 10:30.", impact: "Energy for weekend.", missImpact: "Tired at work.", quote: "Rest up." }
             ],
             6: [ // SATURDAY
-                { start: "04:00", end: "05:00", title: "Wake Up", goals: "Hygiene, Chores.", impact: "Clean environment.", quote: "Cleanliness is half of faith." },
-                { start: "05:00", end: "06:30", title: "Fajr & Prep", goals: "Pray, breakfast.", impact: "Morning energy.", quote: "Fuel up." },
-                { start: "06:30", end: "07:00", title: "Final Prep", goals: "Get ready to leave.", impact: "On time.", quote: "Be punctual." },
-                { start: "07:00", end: "09:00", title: "Commute to Work", goals: "Travel.", impact: "Arrive safely.", quote: "Move forward." },
-                { start: "09:00", end: "12:00", title: "Deep Work: FYP II", goals: "Robotic Car Assembly.", impact: "Hit 90% April target.", quote: "Build it now." },
-                { start: "12:00", end: "13:00", title: "Dhuhr & Lunch", goals: "Pray, eat.", impact: "Energy for students.", quote: "Eat to live." },
-                { start: "13:00", end: "17:00", title: "JOB: KSP Weekend Shift", goals: "Filmmaking Production.", impact: "Ensure students shoot film.", quote: "Deliver value." },
-                { start: "17:00", end: "18:00", title: "Wrap up", goals: "Close studio.", impact: "Equipment safe.", quote: "Secure everything." },
-                { start: "18:00", end: "19:30", title: "Commute Home & Maghrib", goals: "Travel, pray.", impact: "Rest.", quote: "Go home." },
-                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Eat, pray.", impact: "Replenish.", quote: "Nourish." },
-                { start: "20:00", end: "21:45", title: "Quran Memorization", goals: "Weekend push on Juzz 29.", impact: "Accelerated memorization.", quote: "Read." },
-                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Sleep early.", impact: "Ready for Sunday.", quote: "Sleep well." }
+                { start: "04:00", end: "05:00", title: "Wake Up", goals: "Hygiene, Chores.", impact: "Clean environment.", missImpact: "Messy house.", quote: "Cleanliness is half of faith." },
+                { start: "05:00", end: "06:30", title: "Fajr & Prep", goals: "Pray, breakfast.", impact: "Morning energy.", missImpact: "Sluggish start.", quote: "Fuel up." },
+                { start: "06:30", end: "07:00", title: "Final Prep", goals: "Get ready to leave.", impact: "On time.", missImpact: "Late to work.", quote: "Be punctual." },
+                { start: "07:00", end: "09:00", title: "Commute to Work", goals: "Travel.", impact: "Arrive safely.", missImpact: "Delay.", quote: "Move forward." },
+                { start: "09:00", end: "12:00", title: "Deep Work: FYP II", goals: "Robotic Car Assembly.", impact: "Hit 90% April target.", missImpact: "Project panic in May.", quote: "Build it now." },
+                { start: "12:00", end: "13:00", title: "Dhuhr & Lunch", goals: "Pray, eat.", impact: "Energy for students.", missImpact: "Hungry while teaching.", quote: "Eat to live." },
+                { start: "13:00", end: "17:00", title: "JOB: KSP Weekend Shift", goals: "Filmmaking Production.", impact: "Ensure students shoot film.", missImpact: "Weekend cohort fails.", quote: "Deliver value." },
+                { start: "17:00", end: "18:00", title: "Wrap up", goals: "Close studio.", impact: "Equipment safe.", missImpact: "Loss of expensive gear.", quote: "Secure everything." },
+                { start: "18:00", end: "19:30", title: "Commute Home & Maghrib", goals: "Travel, pray.", impact: "Rest.", missImpact: "None.", quote: "Go home." },
+                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Eat, pray.", impact: "Replenish.", missImpact: "None.", quote: "Nourish." },
+                { start: "20:00", end: "21:45", title: "Quran Memorization", goals: "Weekend push on Juzz 29.", impact: "Accelerated memorization.", missImpact: "Fall behind memorization goal.", quote: "Read." },
+                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Sleep early.", impact: "Ready for Sunday.", missImpact: "Tired.", quote: "Sleep well." }
             ],
             0: [ // SUNDAY
-                { start: "04:00", end: "05:00", title: "Wake Up", goals: "Hygiene, Chores.", impact: "Clean environment.", quote: "Start fresh." },
-                { start: "05:00", end: "06:30", title: "Fajr & Prep", goals: "Pray, breakfast.", impact: "Morning energy.", quote: "Fuel up." },
-                { start: "06:30", end: "07:00", title: "Final Prep", goals: "Get ready to leave.", impact: "On time.", quote: "Be punctual." },
-                { start: "07:00", end: "09:00", title: "Commute to Work", goals: "Travel.", impact: "Arrive safely.", quote: "Move forward." },
-                { start: "09:00", end: "12:00", title: "FYP II & Analytics", goals: "Review YouTube analytics.", impact: "Optimize for growth.", quote: "Data drives decisions." },
-                { start: "12:00", end: "13:00", title: "Dhuhr & Lunch", goals: "Pray, eat.", impact: "Energy for students.", quote: "Refuel." },
-                { start: "13:00", end: "17:00", title: "JOB: KSP Weekend Shift", goals: "Filmmaking.", impact: "Ensure students excel.", quote: "Deliver value." },
-                { start: "17:00", end: "18:00", title: "Wrap up", goals: "Close studio.", impact: "Equipment safe.", quote: "Secure everything." },
-                { start: "18:00", end: "19:30", title: "Commute Home & Maghrib", goals: "Travel, pray.", impact: "Rest.", quote: "Go home." },
-                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Eat, pray.", impact: "Replenish.", quote: "Nourish." },
-                { start: "20:00", end: "21:45", title: "Weekly Review & Quran", goals: "Plan next week, memorize.", impact: "A perfect week ahead.", quote: "Fail to plan, plan to fail." },
-                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Sleep by 10:30.", impact: "Ready for Monday.", quote: "Rest for success." }
+                { start: "04:00", end: "05:00", title: "Wake Up", goals: "Hygiene, Chores.", impact: "Clean environment.", missImpact: "Messy house.", quote: "Start fresh." },
+                { start: "05:00", end: "06:30", title: "Fajr & Prep", goals: "Pray, breakfast.", impact: "Morning energy.", missImpact: "Sluggish start.", quote: "Fuel up." },
+                { start: "06:30", end: "07:00", title: "Final Prep", goals: "Get ready to leave.", impact: "On time.", missImpact: "Late.", quote: "Be punctual." },
+                { start: "07:00", end: "09:00", title: "Commute to Work", goals: "Travel.", impact: "Arrive safely.", missImpact: "Delay.", quote: "Move forward." },
+                { start: "09:00", end: "12:00", title: "FYP II & Analytics", goals: "Review YouTube analytics.", impact: "Optimize for growth.", missImpact: "Stagnant channel views.", quote: "Data drives decisions." },
+                { start: "12:00", end: "13:00", title: "Dhuhr & Lunch", goals: "Pray, eat.", impact: "Energy for students.", missImpact: "Hungry.", quote: "Refuel." },
+                { start: "13:00", end: "17:00", title: "JOB: KSP Weekend Shift", goals: "Filmmaking.", impact: "Ensure students excel.", missImpact: "Weekend cohort fails.", quote: "Deliver value." },
+                { start: "17:00", end: "18:00", title: "Wrap up", goals: "Close studio.", impact: "Equipment safe.", missImpact: "Loss.", quote: "Secure everything." },
+                { start: "18:00", end: "19:30", title: "Commute Home & Maghrib", goals: "Travel, pray.", impact: "Rest.", missImpact: "None.", quote: "Go home." },
+                { start: "19:30", end: "20:00", title: "Isha & Dinner", goals: "Eat, pray.", impact: "Replenish.", missImpact: "None.", quote: "Nourish." },
+                { start: "20:00", end: "21:45", title: "Weekly Review & Quran", goals: "Plan next week, memorize.", impact: "A perfect week ahead.", missImpact: "Chaos on Monday.", quote: "Fail to plan, plan to fail." },
+                { start: "21:45", end: "22:30", title: "Sleep Preparation", goals: "Sleep by 10:30.", impact: "Ready for Monday.", missImpact: "Tired for the week.", quote: "Rest for success." }
             ]
         };
 
         const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        
+        // --- PHASE 1 START DATE LOGIC ---
+        // Sets Phase 1 Start to Monday, March 16, 2026
+        const phase1StartDate = new Date(2026, 2, 16); // Month is 0-indexed (2 = March)
+
+        function getCurrentWeekNumber() {
+            const now = new Date();
+            // Reset hours for accurate day diff
+            const date1 = new Date(phase1StartDate.getFullYear(), phase1StartDate.getMonth(), phase1StartDate.getDate());
+            const date2 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            const diffTime = date2 - date1;
+            if (diffTime < 0) return 1; // Before start date, default to week 1
+
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const weekNum = Math.floor(diffDays / 7) + 1;
+            return weekNum > 6 ? 6 : weekNum; // Cap at 6 weeks
+        }
+
+        function getDateStringForDay(weekNum, dayIndex) {
+            // dayIndex: 0=Sun, 1=Mon, ..., 6=Sat
+            // Map day index so Monday is the start of the week (1=0, 2=1, ..., 0=6)
+            const daysOffsetMap = { 1:0, 2:1, 3:2, 4:3, 5:4, 6:5, 0:6 };
+            const offsetInWeek = daysOffsetMap[dayIndex];
+            
+            const totalDaysToAdd = ((weekNum - 1) * 7) + offsetInWeek;
+            
+            const targetDate = new Date(phase1StartDate);
+            targetDate.setDate(targetDate.getDate() + totalDaysToAdd);
+            
+            return targetDate.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
+        }
+
 
         // --- STATE MANAGEMENT ---
         let lastNotifiedSessionStart = null;
@@ -408,17 +453,21 @@
             setInterval(checkSchedule, 10000); // Check every 10 seconds
             
             renderTimeline();
-            renderWeeklyGrid(1); // Render week 1 default
+            const currentWeek = getCurrentWeekNumber();
+            setWeek(currentWeek); // Auto-load current week
             updateNavButtons();
         }
 
         function updateClock() {
             const now = new Date();
             const timeOpts = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-            const dateOpts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateOpts = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
             
             document.getElementById('current-time').innerText = now.toLocaleTimeString('en-GB', timeOpts) + " CAT";
             document.getElementById('current-date').innerText = now.toLocaleDateString('en-GB', dateOpts);
+            
+            const weekNum = getCurrentWeekNumber();
+            document.getElementById('current-week-badge').innerText = `Week ${weekNum}`;
         }
 
         function getTodaySchedule() {
@@ -446,7 +495,6 @@
 
         // --- NAVIGATION LOGIC ---
         function navigateTo(viewId) {
-            // Push to history
             if(historyIndex < viewHistory.length - 1) {
                 viewHistory = viewHistory.slice(0, historyIndex + 1);
             }
@@ -476,7 +524,6 @@
             document.getElementById(viewId).classList.add('active');
             updateNavButtons();
             
-            // Auto close mobile sidebar when navigating
             if(window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.remove('sidebar-expanded');
                 document.getElementById('sidebar').classList.add('sidebar-collapsed');
@@ -534,8 +581,10 @@
                 t.classList.add('bg-slate-800', 'text-slate-300');
             });
             const activeTab = document.getElementById('tab-w' + weekNum);
-            activeTab.classList.remove('bg-slate-800', 'text-slate-300');
-            activeTab.classList.add('bg-accent', 'text-dark', 'font-bold');
+            if (activeTab) {
+                activeTab.classList.remove('bg-slate-800', 'text-slate-300');
+                activeTab.classList.add('bg-accent', 'text-dark', 'font-bold');
+            }
             renderWeeklyGrid(weekNum);
         }
 
@@ -548,9 +597,14 @@
             
             weekOrder.forEach(dayIndex => {
                 const dayData = scheduleData[dayIndex];
+                const displayDate = getDateStringForDay(weekNum, dayIndex);
+                
                 let html = `
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 flex flex-col h-[500px] overflow-y-auto custom-scrollbar">
-                        <h3 class="text-center font-bold text-accent mb-4 sticky top-0 bg-slate-800/90 backdrop-blur py-2 z-10">${dayNames[dayIndex]}</h3>
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4 flex flex-col h-[500px] overflow-y-auto custom-scrollbar relative">
+                        <div class="sticky top-0 bg-slate-800/90 backdrop-blur py-2 z-10 text-center mb-4 border-b border-slate-700 pb-2">
+                            <h3 class="font-bold text-accent">${dayNames[dayIndex]}</h3>
+                            <p class="text-xs text-slate-400 font-mono">${displayDate}</p>
+                        </div>
                         <div class="space-y-3">
                 `;
                 
@@ -581,18 +635,16 @@
                 const sStart = timeToMins(session.start);
                 const sEnd = timeToMins(session.end);
 
-                // Check active session
                 if (currentMins >= sStart && currentMins < sEnd) {
                     currentSession = session;
                 }
 
-                // Check if a session just ended in the last minute
                 if (currentMins === sEnd) {
                     justEndedSession = session;
                 }
             }
 
-            // Update Current Status UI
+            // Update Current Status UI (3 Columns with Positive & Negative Impact)
             if (currentSession) {
                 document.getElementById('current-session-card').innerHTML = `
                     <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl"></div>
@@ -601,31 +653,42 @@
                             <span class="inline-block bg-accent/20 text-accent text-xs font-bold px-3 py-1 rounded-full mb-3 animate-pulse">
                                 ACTIVE NOW
                             </span>
-                            <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">${currentSession.title}</h3>
+                            <h3 class="text-xl md:text-3xl font-bold text-white mb-2">${currentSession.title}</h3>
                             <p class="text-slate-300 mb-4"><i class="fas fa-clock mr-2 text-slate-400"></i>${currentSession.start} - ${currentSession.end}</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 relative z-10">
-                        <div class="bg-black/20 p-4 rounded-lg border border-white/5">
-                            <h4 class="text-xs text-emerald-400 uppercase font-bold mb-2">Goals & Objectives</h4>
-                            <p class="text-sm">${currentSession.goals}</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mt-2 relative z-10">
+                        <div class="bg-emerald-900/20 p-3 md:p-4 rounded-lg border border-emerald-500/20">
+                            <h4 class="text-[10px] md:text-xs text-emerald-400 uppercase font-bold mb-1 md:mb-2"><i class="fas fa-bullseye mr-1"></i> Objective</h4>
+                            <p class="text-xs md:text-sm text-slate-200">${currentSession.goals}</p>
                         </div>
-                        <div class="bg-black/20 p-4 rounded-lg border border-white/5">
-                            <h4 class="text-xs text-blue-400 uppercase font-bold mb-2">Impact</h4>
-                            <p class="text-sm">${currentSession.impact}</p>
+                        <div class="bg-blue-900/20 p-3 md:p-4 rounded-lg border border-blue-500/20">
+                            <h4 class="text-[10px] md:text-xs text-blue-400 uppercase font-bold mb-1 md:mb-2"><i class="fas fa-arrow-up mr-1"></i> Positive Impact</h4>
+                            <p class="text-xs md:text-sm text-slate-200">${currentSession.impact}</p>
+                        </div>
+                        <div class="bg-red-900/20 p-3 md:p-4 rounded-lg border border-red-500/20">
+                            <h4 class="text-[10px] md:text-xs text-red-400 uppercase font-bold mb-1 md:mb-2"><i class="fas fa-arrow-down mr-1"></i> Negative Impact</h4>
+                            <p class="text-xs md:text-sm text-slate-200">${currentSession.missImpact}</p>
                         </div>
                     </div>
                 `;
 
-                // Alert Start
                 if (lastNotifiedSessionStart !== currentSession.title) {
                     triggerAlert(currentSession, 'start');
                     lastNotifiedSessionStart = currentSession.title;
                     renderTimeline(); 
                 }
+            } else {
+                document.getElementById('current-session-card').innerHTML = `
+                    <div class="text-center py-8 relative z-10">
+                        <i class="fas fa-mug-hot text-4xl text-slate-600 mb-3"></i>
+                        <h3 class="text-xl font-bold text-slate-400">Free Time / Transition</h3>
+                        <p class="text-sm text-slate-500 mt-2">Check the timeline for the next event.</p>
+                    </div>
+                `;
             }
 
-            // Alert End
             if (justEndedSession && lastNotifiedSessionEnd !== justEndedSession.title) {
                 triggerAlert(justEndedSession, 'end');
                 lastNotifiedSessionEnd = justEndedSession.title;
@@ -645,21 +708,21 @@
             document.getElementById('modal-title').innerText = session.title;
             document.getElementById('modal-goals').innerText = session.goals;
             document.getElementById('modal-impact').innerText = session.impact;
+            document.getElementById('modal-missImpact').innerText = session.missImpact;
             document.getElementById('modal-quote').innerText = `"${session.quote} DO IT TODAY!"`;
 
-            // Mobile Audio & Vibration Setup
             const isMobile = window.innerWidth <= 768;
             
             if (type === 'start') {
                 headline.innerText = "Session Started!";
                 topBar.className = "absolute top-0 left-0 w-full h-2 bg-accent";
-                iconBg.className = "w-14 h-14 rounded-full flex items-center justify-center text-2xl mr-4 shadow-lg bg-accent/20 text-accent";
+                iconBg.className = "w-14 h-14 shrink-0 rounded-full flex items-center justify-center text-2xl mr-4 shadow-lg bg-accent/20 text-accent";
                 icon.className = "fas fa-play";
                 document.getElementById('tracking-section').classList.add('hidden'); // Only track on end
                 
                 if(isMobile) {
                     if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
-                    document.getElementById('audio-start').play().catch(e => console.log("Audio blocked: user interaction required"));
+                    document.getElementById('audio-start').play().catch(e => console.log("Audio blocked"));
                 }
 
                 if (Notification.permission === "granted") {
@@ -668,13 +731,13 @@
             } else {
                 headline.innerText = "Session Ended";
                 topBar.className = "absolute top-0 left-0 w-full h-2 bg-warning";
-                iconBg.className = "w-14 h-14 rounded-full flex items-center justify-center text-2xl mr-4 shadow-lg bg-warning/20 text-warning";
+                iconBg.className = "w-14 h-14 shrink-0 rounded-full flex items-center justify-center text-2xl mr-4 shadow-lg bg-warning/20 text-warning";
                 icon.className = "fas fa-flag-checkered";
                 document.getElementById('tracking-section').classList.remove('hidden'); // Show tracking
                 
                 if(isMobile) {
                     if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]);
-                    document.getElementById('audio-end').play().catch(e => console.log("Audio blocked: user interaction required"));
+                    document.getElementById('audio-end').play().catch(e => console.log("Audio blocked"));
                 }
 
                 if (Notification.permission === "granted") {
@@ -693,7 +756,6 @@
         function recordPerformance(isSuccess) {
             if(isSuccess) {
                 stats.completed++;
-                // Incrementally advance goals just as a visual reward metric
                 if (stats.goal1Progress < 100) stats.goal1Progress += 0.5;
                 if (stats.goal2Progress < 100) stats.goal2Progress += 0.5;
                 if (stats.goal3Progress < 100) stats.goal3Progress += 0.5;
@@ -705,22 +767,15 @@
             updateProgressUI();
             closeModal();
             
-            // Visual feedback
             alert(isSuccess ? "Great job! Progress recorded." : "Don't give up. Learn and adjust for the next session.");
         }
 
         function updateProgressUI() {
             document.getElementById('score-display').innerText = stats.completed;
-            
-            // Goal 1: Faceless
             document.getElementById('bar-goal1').style.width = stats.goal1Progress + '%';
             document.getElementById('lbl-goal1').innerText = Math.floor(stats.goal1Progress) + '%';
-            
-            // Goal 2: Quran
             document.getElementById('bar-goal2').style.width = stats.goal2Progress + '%';
             document.getElementById('lbl-goal2').innerText = Math.floor(stats.goal2Progress) + '%';
-
-            // Goal 3: FYP
             document.getElementById('bar-goal3').style.width = stats.goal3Progress + '%';
             document.getElementById('lbl-goal3').innerText = Math.floor(stats.goal3Progress) + '%';
         }
