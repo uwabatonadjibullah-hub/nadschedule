@@ -53,13 +53,12 @@
         .hide-on-collapse { transition: opacity 0.2s; }
         .sidebar-collapsed .hide-on-collapse { opacity: 0; pointer-events: none; position: absolute; }
         
-        /* View Transitions */
-        .view-panel { display: none; animation: slideIn 0.3s ease-out forwards; }
-        .view-panel.active { display: block; }
+        /* View Transitions (Fixed for Flexbox) */
+        .view-panel { display: none !important; animation: slideIn 0.3s ease-out forwards; }
+        .view-panel.active { display: flex !important; }
 
-        /* Excel Grid Specifics */
-        .excel-grid-container { height: 1110px; /* 18.5 hours * 60px/hr */ }
-        .hour-line { height: 60px; border-bottom: 1px solid #1e293b; }
+        /* Excel Grid Specifics - Expanded to fit 30min increments */
+        .excel-grid-container { height: 2280px; /* 19 hours * 120px/hr */ }
         
         /* Time Block Colors */
         .type-faceless { background-color: rgba(220, 38, 38, 0.9); border-left: 4px solid #f87171; }
@@ -148,7 +147,7 @@
         <!-- Weekly View Button -->
         <div class="p-4 border-t border-slate-800 shrink-0 hide-on-collapse">
             <button onclick="navigateTo('view-weekly')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-lg flex items-center justify-center transition shadow-lg border border-slate-600">
-                <i class="fas fa-table mr-2"></i> View Excel Schedule
+                <i class="fas fa-table mr-2"></i> WEEKLY SCHEDULE
             </button>
         </div>
     </aside>
@@ -185,7 +184,7 @@
             </div>
 
             <div class="flex items-center space-x-2 md:space-x-4">
-                <button onclick="requestNotificationPermission()" class="flex text-[10px] md:text-xs bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/30 px-2 md:px-3 py-1.5 rounded items-center transition">
+                <button onclick="requestNotificationPermission()" class="flex text-[10px] md:text-xs bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/30 px-2 md:px-3 py-1.5 rounded items-center transition shadow-lg">
                     <i class="fas fa-bell mr-1 md:mr-2"></i> 
                     <span class="hidden sm:inline">Enable Alerts</span>
                     <span class="sm:hidden">Alerts</span>
@@ -197,8 +196,8 @@
         </header>
 
         <!-- View: Today (Default) -->
-        <div id="view-today" class="view-panel active flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
-            <div class="mb-8">
+        <div id="view-today" class="view-panel active flex-1 flex-col overflow-y-auto custom-scrollbar p-4 md:p-8">
+            <div class="mb-8 shrink-0">
                 <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Right Now</h2>
                 <div id="current-session-card" class="bg-gradient-to-br from-indigo-900 to-slate-900 border border-indigo-500/30 rounded-xl p-4 md:p-6 shadow-2xl relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl"></div>
@@ -215,7 +214,7 @@
         </div>
 
         <!-- View: Weekly Schedule (EXCEL STYLE GRID) -->
-        <div id="view-weekly" class="view-panel flex-1 overflow-hidden flex flex-col p-2 md:p-4">
+        <div id="view-weekly" class="view-panel flex-1 overflow-hidden flex-col p-2 md:p-4">
             
             <div class="flex overflow-x-auto custom-scrollbar pb-2 mb-2 space-x-2 shrink-0">
                 <button onclick="setWeek(1)" id="tab-w1" class="week-tab bg-accent text-dark font-bold px-4 py-1.5 rounded whitespace-nowrap text-sm">Week 1</button>
@@ -231,7 +230,7 @@
                 <!-- Grid Header (Frozen Top) -->
                 <div class="flex sticky top-0 z-30 bg-darker border-b border-slate-600 shadow min-w-[1000px]">
                     <div class="w-20 shrink-0 border-r border-slate-600 bg-darker sticky left-0 z-40 p-2 flex items-end justify-center">
-                        <span class="text-xs font-bold text-slate-400">TIME</span>
+                        <span class="text-[10px] font-bold text-slate-400">TIME</span>
                     </div>
                     <!-- Days -->
                     <div class="flex-1 grid grid-cols-7 text-center font-bold text-xs text-white uppercase tracking-wider">
@@ -247,7 +246,6 @@
                 
                 <!-- Grid Body -->
                 <div class="flex relative min-w-[1000px] excel-grid-container" id="excel-grid">
-                    <!-- Background Lines will be generated via JS -->
                     
                     <!-- Time Column (Frozen Left) -->
                     <div class="w-20 shrink-0 border-r border-slate-600 bg-darker sticky left-0 z-20 flex flex-col relative" id="grid-time-col">
@@ -262,7 +260,7 @@
             </div>
             
             <!-- Legend -->
-            <div class="mt-2 flex flex-wrap gap-3 text-[10px] uppercase font-bold text-slate-400">
+            <div class="mt-2 shrink-0 flex flex-wrap gap-3 text-[10px] uppercase font-bold text-slate-400">
                 <span class="flex items-center"><span class="w-3 h-3 bg-red-600 inline-block mr-1"></span> Faceless</span>
                 <span class="flex items-center"><span class="w-3 h-3 bg-emerald-600 inline-block mr-1"></span> Quran</span>
                 <span class="flex items-center"><span class="w-3 h-3 bg-purple-600 inline-block mr-1"></span> FYP</span>
@@ -693,21 +691,31 @@
                 document.getElementById('date-' + dayIds[idx]).innerText = getDateStringForDay(weekNum, dayIndex);
             });
 
-            // Render Time Column (4:00 to 22:30 -> 18.5 hours. 1 hour = 60px)
+            // Render Time Column (4:00 to 22:30 -> 19 hours. 1 hour = 120px)
             const timeCol = document.getElementById('grid-time-col');
             timeCol.innerHTML = '';
-            for(let h = 4; h <= 22; h++) {
-                const timeStr = `${h.toString().padStart(2, '0')}:00`;
-                timeCol.innerHTML += `<div class="hour-line px-2 py-1 w-full text-right shrink-0 absolute" style="top: ${(h-4)*60}px;">${timeStr}</div>`;
-            }
-
-            // Render Tasks Area
+            
             const tasksArea = document.getElementById('grid-tasks-area');
             tasksArea.innerHTML = '';
-            
-            // Add horizontal lines for background
+
             for(let h = 4; h <= 22; h++) {
-                tasksArea.innerHTML += `<div class="absolute w-full border-b border-slate-700/50 pointer-events-none" style="top: ${(h-4)*60}px; height: 60px;"></div>`;
+                const topHour = (h - 4) * 120;
+                const topHalf = topHour + 60;
+                
+                // Time Labels
+                const timeStrHour = `${h.toString().padStart(2, '0')}:00`;
+                timeCol.innerHTML += `<div class="px-2 py-1 w-full text-right shrink-0 absolute text-slate-300 text-xs font-bold" style="top: ${topHour}px;">${timeStrHour}</div>`;
+                
+                if (h !== 22) {
+                    const timeStrHalf = `${h.toString().padStart(2, '0')}:30`;
+                    timeCol.innerHTML += `<div class="px-2 py-1 w-full text-right shrink-0 absolute text-slate-500 text-[10px]" style="top: ${topHalf}px;">${timeStrHalf}</div>`;
+                }
+
+                // Horizontal Grid Lines
+                tasksArea.innerHTML += `<div class="absolute w-full border-t border-slate-700/80 pointer-events-none" style="top: ${topHour}px; height: 60px;"></div>`;
+                if (h !== 22) {
+                    tasksArea.innerHTML += `<div class="absolute w-full border-t border-slate-700/40 border-dashed pointer-events-none" style="top: ${topHalf}px; height: 60px;"></div>`;
+                }
             }
 
             // Render Daily Blocks
@@ -717,12 +725,12 @@
                 let colHtml = `<div class="relative border-r border-slate-700/50" style="grid-column: ${colIdx + 1};">`;
                 
                 dayData.forEach(session => {
-                    // Start of grid is 4:00 (240 mins)
+                    // Start of grid is 4:00 (240 mins). Base scale: 1 min = 2px.
                     const startMins = timeToMins(session.start);
                     const endMins = timeToMins(session.end);
                     
-                    const topPx = (startMins - 240); // 1 min = 1px
-                    const heightPx = (endMins - startMins);
+                    const topPx = (startMins - 240) * 2; 
+                    const heightPx = (endMins - startMins) * 2;
                     
                     const typeClass = `type-${session.type}`;
                     
@@ -838,7 +846,7 @@
                 
                 if(isMobile) {
                     if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
-                    document.getElementById('audio-start').play().catch(e => console.log("Audio blocked"));
+                    document.getElementById('audio-start').play().catch(e => console.log("Audio playing requires interaction first."));
                 }
                 if (Notification.permission === "granted") new Notification("Started: " + session.title, { body: session.goals });
                 
@@ -872,7 +880,7 @@
 
                 if(isMobile) {
                     if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]);
-                    document.getElementById('audio-end').play().catch(e => console.log("Audio blocked"));
+                    document.getElementById('audio-end').play().catch(e => console.log("Audio playing requires interaction first."));
                 }
                 if (Notification.permission === "granted") new Notification("Ended: " + session.title, { body: "Confirm your performance." });
             }
@@ -942,8 +950,26 @@
         }
 
         function requestNotificationPermission() {
-            if (!("Notification" in window)) alert("Browser does not support notifications");
-            else if (Notification.permission !== "denied") Notification.requestPermission().then(p => { if (p==="granted") alert("Alerts enabled!"); });
+            // Unlock Mobile Audio engine quietly
+            document.getElementById('audio-start').play().catch(()=>{});
+            document.getElementById('audio-start').pause();
+            document.getElementById('audio-start').currentTime = 0;
+            
+            document.getElementById('audio-end').play().catch(()=>{});
+            document.getElementById('audio-end').pause();
+            document.getElementById('audio-end').currentTime = 0;
+
+            if (!("Notification" in window)) {
+                alert("This browser does not support desktop notifications.");
+            } else if (Notification.permission === "granted") {
+                alert("Alerts are active! Note: Keep this tab open. If on a phone, Add this page to your Home Screen for the best alert experience.");
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(function (permission) {
+                    if (permission === "granted") {
+                        alert("Alerts enabled! Note: Keep this tab open to ensure alarms sound.");
+                    }
+                });
+            }
         }
 
         window.onload = initApp;
