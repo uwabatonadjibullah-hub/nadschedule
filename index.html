@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NAD Master Dashboard</title>
     
     <!-- Favicons & Manifest -->
@@ -67,11 +67,11 @@
         .hide-on-collapse { transition: opacity 0.2s; }
         .sidebar-collapsed .hide-on-collapse { opacity: 0; pointer-events: none; position: absolute; }
         
-        /* View Transitions (Fixed for Flexbox & Mobile constraint) */
+        /* View Transitions */
         .view-panel { display: none !important; animation: slideIn 0.3s ease-out forwards; }
         .view-panel.active { display: flex !important; }
 
-        /* Time Block Colors (Restored for Grid) */
+        /* Time Block Colors */
         .type-faceless { background-color: rgba(220, 38, 38, 0.9); border-left: 4px solid #f87171; }
         .type-quran { background-color: rgba(5, 150, 105, 0.9); border-left: 4px solid #34d399; }
         .type-fyp { background-color: rgba(124, 58, 237, 0.9); border-left: 4px solid #a78bfa; }
@@ -80,26 +80,22 @@
         .type-prayer { background-color: rgba(22, 163, 74, 0.9); border-left: 4px solid #4ade80; }
         .type-general { background-color: rgba(194, 65, 12, 0.9); border-left: 4px solid #fb923c; }
 
-        /* --- MOBILE FIXES --- */
+        /* Mobile Fixes */
         @media (max-width: 768px) {
             #view-today {
                 display: flex !important;
                 overflow-y: auto !important;
                 -webkit-overflow-scrolling: touch;
             }
-            
             #daily-timeline {
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
                 min-height: 300px;
             }
-            
-            /* Ensure the timeline items are visible */
             #daily-timeline > div {
                 display: block !important;
             }
-
             .view-panel.active #daily-timeline {
                 display: block !important;
             }
@@ -220,7 +216,7 @@
             </div>
 
             <div class="flex items-center space-x-2 md:space-x-4">
-                <button onclick="requestNotificationPermission()" class="flex text-[10px] md:text-xs bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/30 px-2 md:px-3 py-1.5 rounded items-center transition shadow-lg">
+                <button onclick="requestNotificationPermission()" id="alert-btn" class="flex text-[10px] md:text-xs bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/30 px-2 md:px-3 py-1.5 rounded items-center transition shadow-lg">
                     <i class="fas fa-bell mr-1 md:mr-2"></i> 
                     <span class="hidden sm:inline">Enable Alerts</span>
                     <span class="sm:hidden">Alerts</span>
@@ -233,6 +229,11 @@
 
         <!-- View: Today (Default) -->
         <div id="view-today" class="view-panel active flex-1 flex-col overflow-y-auto custom-scrollbar p-4 md:p-8 min-h-0 w-full">
+            
+            <div id="sync-status" class="hidden mb-4 bg-emerald-900/30 border border-emerald-500/50 text-emerald-400 p-3 rounded-lg text-xs flex items-center">
+                <i class="fas fa-check-circle mr-2"></i> All of today's notifications are pre-scheduled. You will receive them even if you close the app.
+            </div>
+
             <div class="mb-8 shrink-0">
                 <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Right Now</h2>
                 <div id="current-session-card" class="bg-gradient-to-br from-indigo-900 to-slate-900 border border-indigo-500/30 rounded-xl p-4 md:p-6 shadow-2xl relative overflow-hidden">
@@ -242,7 +243,10 @@
             </div>
 
             <div class="pb-20">
-                <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Today's Timeline</h2>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Today's Timeline</h2>
+                    <button onclick="openAddModal(new Date().getDay())" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded border border-slate-600 transition shadow"><i class="fas fa-plus mr-1"></i> Add</button>
+                </div>
                 <div class="relative pl-6 py-2" id="daily-timeline">
                     <!-- Populated by JS -->
                 </div>
@@ -252,13 +256,15 @@
         <!-- View: Weekly Schedule (EXCEL STYLE GRID WITH FROZEN COLS/ROWS) -->
         <div id="view-weekly" class="view-panel flex-1 flex-col overflow-hidden p-2 md:p-4 min-h-0 w-full relative">
             
-            <div class="flex overflow-x-auto custom-scrollbar pb-2 mb-2 space-x-2 shrink-0 w-full">
+            <div class="flex overflow-x-auto custom-scrollbar pb-2 mb-2 space-x-2 shrink-0 w-full items-center">
                 <button onclick="setWeek(1)" id="tab-w1" class="week-tab bg-accent text-dark font-bold px-4 py-1.5 rounded whitespace-nowrap text-sm">Week 1</button>
                 <button onclick="setWeek(2)" id="tab-w2" class="week-tab bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-1.5 rounded whitespace-nowrap text-sm">Week 2</button>
                 <button onclick="setWeek(3)" id="tab-w3" class="week-tab bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-1.5 rounded whitespace-nowrap text-sm">Week 3</button>
                 <button onclick="setWeek(4)" id="tab-w4" class="week-tab bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-1.5 rounded whitespace-nowrap text-sm">Week 4</button>
                 <button onclick="setWeek(5)" id="tab-w5" class="week-tab bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-1.5 rounded whitespace-nowrap text-sm">Week 5</button>
                 <button onclick="setWeek(6)" id="tab-w6" class="week-tab bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-1.5 rounded whitespace-nowrap text-sm">Week 6</button>
+                
+                <button onclick="openAddModal()" class="ml-auto shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded whitespace-nowrap text-xs flex items-center shadow border border-emerald-500/50 transition"><i class="fas fa-plus mr-1"></i> Add Block</button>
             </div>
 
             <!-- Scrollable Grid Wrapper -->
@@ -400,14 +406,92 @@
             </div>
         </div>
     </div>
+    
+    <!-- Edit/Add Session Modal -->
+    <div id="edit-session-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+        <div class="glass-panel bg-darker w-full max-w-lg rounded-2xl shadow-2xl border border-accent/50 p-6 relative custom-scrollbar max-h-[90vh] overflow-y-auto">
+            <h3 class="text-xl font-bold text-white mb-4" id="edit-session-title">Edit Session</h3>
+            
+            <div class="space-y-4">
+                <div id="edit-day-container" class="hidden">
+                    <label class="text-xs text-slate-400 uppercase font-bold">Day</label>
+                    <select id="edit-day" class="w-full bg-slate-800 border border-slate-700 text-white rounded p-2 text-sm mt-1 focus:border-accent outline-none">
+                        <option value="1">Monday</option>
+                        <option value="2">Tuesday</option>
+                        <option value="3">Wednesday</option>
+                        <option value="4">Thursday</option>
+                        <option value="5">Friday</option>
+                        <option value="6">Saturday</option>
+                        <option value="0">Sunday</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="text-xs text-slate-400 uppercase font-bold">Title</label>
+                    <input type="text" id="edit-title" class="w-full bg-slate-800 border border-slate-700 text-white rounded p-2 text-sm mt-1 focus:border-accent outline-none">
+                </div>
+                
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="text-xs text-slate-400 uppercase font-bold">Start Time</label>
+                        <input type="time" id="edit-start" class="w-full bg-slate-800 border border-slate-700 text-white rounded p-2 text-sm mt-1 focus:border-accent outline-none">
+                    </div>
+                    <div class="flex-1">
+                        <label class="text-xs text-slate-400 uppercase font-bold">End Time</label>
+                        <input type="time" id="edit-end" class="w-full bg-slate-800 border border-slate-700 text-white rounded p-2 text-sm mt-1 focus:border-accent outline-none">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="text-xs text-slate-400 uppercase font-bold">Category Type</label>
+                    <select id="edit-type" class="w-full bg-slate-800 border border-slate-700 text-white rounded p-2 text-sm mt-1 focus:border-accent outline-none">
+                        <option value="faceless">Faceless</option>
+                        <option value="quran">Quran</option>
+                        <option value="fyp">FYP</option>
+                        <option value="class">Class</option>
+                        <option value="job">Job</option>
+                        <option value="prayer">Prayer</option>
+                        <option value="general">General</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="text-xs text-slate-400 uppercase font-bold">Objective / Goals</label>
+                    <textarea id="edit-goals" rows="2" class="w-full bg-slate-800 border border-slate-700 text-white rounded p-2 text-sm mt-1 focus:border-accent outline-none"></textarea>
+                </div>
+                
+                <div class="flex gap-4 flex-col md:flex-row">
+                    <div class="flex-1">
+                        <label class="text-xs text-slate-400 uppercase font-bold text-blue-400">Positive Impact</label>
+                        <textarea id="edit-impact" rows="2" class="w-full bg-blue-900/20 border border-blue-500/30 text-white rounded p-2 text-sm mt-1 focus:border-blue-400 outline-none"></textarea>
+                    </div>
+                    <div class="flex-1">
+                        <label class="text-xs text-slate-400 uppercase font-bold text-red-400">Negative Impact</label>
+                        <textarea id="edit-missImpact" rows="2" class="w-full bg-red-900/20 border border-red-500/30 text-white rounded p-2 text-sm mt-1 focus:border-red-400 outline-none"></textarea>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="text-xs text-slate-400 uppercase font-bold">Quote / Motivation</label>
+                    <input type="text" id="edit-quote" class="w-full bg-slate-800 border border-slate-700 text-white rounded p-2 text-sm mt-1 focus:border-accent outline-none">
+                </div>
+            </div>
+            
+            <div class="mt-6 flex gap-3">
+                <button onclick="saveSession()" class="flex-1 bg-accent hover:bg-sky-400 text-dark font-bold py-3 rounded-lg transition shadow-lg">Save</button>
+                <button onclick="closeEditModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition">Cancel</button>
+                <button onclick="deleteSession()" id="btn-delete-session" class="bg-danger/80 hover:bg-danger text-white font-bold py-3 px-4 rounded-lg transition"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    </div>
 
     <!-- Hidden Audio elements for alerts -->
     <audio id="audio-start" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
     <audio id="audio-end" src="https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3" preload="auto"></audio>
 
     <script>
-        // --- DATA STRUCTURE WITH TYPES ---
-        const scheduleData = {
+        // --- DATA STRUCTURE WITH TYPES (DEFAULT FALLBACK) ---
+        const defaultScheduleData = {
             1: [ // MONDAY
                 { start: "04:00", end: "05:00", type: "prayer", title: "Wake Up & Tahajjud", goals: "Spiritual connection, Suhoor for Fasting", impact: "High energy, immense blessings.", missImpact: "Brain fog, missed spiritual anchor.", quote: "The early morning has gold in its mouth." },
                 { start: "05:00", end: "06:30", type: "faceless", title: "Fajr, FYP II & Faceless Batching", goals: "Pray Fajr. Execute Phase 1 Scripts.", impact: "Stay ahead of YouTube algorithm.", missImpact: "Fall behind on the 25 uploads/week schedule.", quote: "Procrastination is the thief of time." },
@@ -506,6 +590,13 @@
             ]
         };
 
+        // Initialize user schedule from LocalStorage or fallback to default
+        let scheduleData = JSON.parse(localStorage.getItem('nadjibullahScheduleV1')) || defaultScheduleData;
+
+        // Variables for editing state
+        let editingDay = null;
+        let editingIndex = null;
+
         const facelessMissions = {
             1: "The Writer's Room (Write 25 Scripts)",
             2: "The Audio Studio (Generate Voiceovers)",
@@ -560,6 +651,7 @@
         let activeSessionData = null;
         let viewHistory = ['view-today'];
         let historyIndex = 0;
+        let wakeLock = null; // To prevent screen from sleeping
 
         // V2 Stats structure
         let stats = JSON.parse(localStorage.getItem('nadjibullahStatsV2')) || {
@@ -569,7 +661,6 @@
             fyp: { milestones: [false, false, false, false, false, false] }
         };
 
-        // Check if new week started, reset weekly stats
         function checkAndResetWeeklyStats() {
             const actualWeek = getCurrentWeekNumber();
             if (stats.currentWeekTracker !== actualWeek) {
@@ -592,13 +683,9 @@
         }
 
         function handleMobileRendering() {
-            // Force re-render of timeline when switching to mobile
             renderTimeline();
-            
-            // Adjust any mobile-specific layout issues
             const isMobile = window.innerWidth <= 768;
             if (isMobile) {
-                // Ensure the timeline container is visible
                 const timelineContainer = document.getElementById('daily-timeline');
                 if (timelineContainer) {
                     timelineContainer.style.minHeight = 'auto';
@@ -613,38 +700,59 @@
             
             updateProgressUI();
             checkSchedule();
-            setInterval(checkSchedule, 10000); // Check every 10s
+            setInterval(checkSchedule, 10000); // Active polling when app is open
             
-            renderTimeline(); // Initial render
-            
-            // Ensure timeline renders after all content is loaded
+            renderTimeline(); 
             setTimeout(renderTimeline, 100);
 
             const currentWeek = getCurrentWeekNumber();
             setWeek(currentWeek); 
             updateNavButtons();
 
-            // Add resize listener for responsive updates
-            window.addEventListener('resize', function() {
-                handleMobileRendering();
-            });
-            
-            // Handle orientation change on mobile
+            window.addEventListener('resize', handleMobileRendering);
             window.addEventListener('orientationchange', function() {
                 setTimeout(handleMobileRendering, 200);
             });
 
-            // Inline Service Worker registration for PWA installability and Web Push handling
+            // Robust Service Worker Registration for Android Background Support
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                     const swCode = `
                         self.addEventListener('install', e => self.skipWaiting());
                         self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-                        self.addEventListener('fetch', e => {}); // Basic fetch listener to pass PWA criteria
+                        self.addEventListener('fetch', e => {}); 
+                        
+                        // Handle clicking the notification (opens the app from background)
+                        self.addEventListener('notificationclick', e => {
+                            e.notification.close();
+                            e.waitUntil(
+                                clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+                                    if (windowClients.length > 0) {
+                                        return windowClients[0].focus();
+                                    } else {
+                                        return clients.openWindow('/');
+                                    }
+                                })
+                            );
+                        });
                     `;
                     const blob = new Blob([swCode], { type: 'application/javascript' });
-                    navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(console.error);
+                    navigator.serviceWorker.register(URL.createObjectURL(blob)).then(reg => {
+                        console.log('Service Worker Registered');
+                        // Attempt to pre-schedule notifications
+                        if (Notification.permission === 'granted') {
+                            scheduleFutureNotifications(reg);
+                        }
+                    }).catch(console.error);
                 });
+            }
+            
+            // Check button state
+            if ("Notification" in window && Notification.permission === "granted") {
+                const btn = document.getElementById('alert-btn');
+                btn.classList.add('bg-emerald-600/20', 'text-emerald-400', 'border-emerald-500/30');
+                btn.classList.remove('bg-indigo-600/20', 'text-indigo-400');
+                btn.innerHTML = `<i class="fas fa-check-double mr-1 md:mr-2"></i> <span class="hidden sm:inline">Alerts Active</span><span class="sm:hidden">Active</span>`;
             }
         }
 
@@ -694,11 +802,7 @@
             document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
             
-            // Re-render timeline when switching to today view
-            if (viewId === 'view-today') {
-                // Small delay to ensure DOM is ready
-                setTimeout(renderTimeline, 50);
-            }
+            if (viewId === 'view-today') setTimeout(renderTimeline, 50);
 
             updateNavButtons();
             if(window.innerWidth < 768) {
@@ -715,17 +819,17 @@
         // --- TODAY RENDERING ---
         function renderTimeline() {
             const container = document.getElementById('daily-timeline');
-            if (!container) return; // Guard clause added
+            if (!container) return; 
 
+            const todayDayIdx = new Date().getDay();
             const today = getTodaySchedule();
             container.innerHTML = '<div class="timeline-line"></div>';
 
             const now = new Date();
             const currentMins = now.getHours() * 60 + now.getMinutes();
-            // Check if we're on mobile
             const isMobile = window.innerWidth <= 768;
 
-            today.forEach((session) => {
+            today.forEach((session, i) => {
                 const startMins = timeToMins(session.start);
                 const endMins = timeToMins(session.end);
                 
@@ -746,7 +850,10 @@
                         <div class="border rounded-lg p-4 transition-all duration-300 ${statusClass}">
                             <div class="flex justify-between items-start md:items-center mb-1 flex-col md:flex-row gap-1">
                                 <h3 class="font-bold text-sm md:text-base">${session.title}</h3>
-                                <span class="text-[10px] md:text-xs font-mono bg-black/30 px-2 py-1 rounded">${session.start} - ${session.end}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] md:text-xs font-mono bg-black/30 px-2 py-1 rounded">${session.start} - ${session.end}</span>
+                                    <button onclick="event.stopPropagation(); openEditModal(${todayDayIdx}, ${i})" class="text-slate-400 hover:text-accent transition p-1"><i class="fas fa-edit"></i></button>
+                                </div>
                             </div>
                             <p class="text-xs mt-1 opacity-80"><i class="fas fa-bullseye mr-1"></i> ${session.goals}</p>
                         </div>
@@ -754,7 +861,6 @@
                 `;
             });
 
-            // Ensure container is visible on mobile
             if (isMobile) {
                 container.style.display = 'block';
                 container.style.visibility = 'visible';
@@ -776,27 +882,24 @@
         }
 
         function renderExcelGrid(weekNum) {
-            // Set Dates in header
-            const weekOrder = [1, 2, 3, 4, 5, 6, 0]; // Mon to Sun
+            const weekOrder = [1, 2, 3, 4, 5, 6, 0]; 
             const dayIds = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
             weekOrder.forEach((dayIndex, idx) => {
                 document.getElementById('date-' + dayIds[idx]).innerText = getDateStringForDay(weekNum, dayIndex);
             });
 
-            // Render Time Column (4:00 to 22:30 -> 18.5 hours. 1 min = 2px. 30min block = 60px height)
             const timeCol = document.getElementById('grid-time-col');
             timeCol.innerHTML = '';
             
             const tasksArea = document.getElementById('grid-tasks-area');
             tasksArea.innerHTML = '';
 
-            // Generate exactly 30-min block visuals
             let timeHtml = '';
             let gridLinesHtml = '';
             
             for(let h = 4; h <= 22; h++) {
                 for(let m = 0; m < 60; m += 30) {
-                    if (h === 22 && m === 30) continue; // Grid stops exactly at 22:30
+                    if (h === 22 && m === 30) continue; 
                     
                     let startStr = `${h.toString().padStart(2,'0')}:${m === 0 ? '00' : '30'}`;
                     let endH = m === 30 ? h + 1 : h;
@@ -805,10 +908,7 @@
                     
                     let topPx = ((h - 4) * 60 + m) * 2; 
                     
-                    // Label
                     timeHtml += `<div class="absolute w-full flex flex-col items-center justify-center border-b border-slate-700/50 text-[9px] md:text-[11px] font-mono text-slate-400 p-1 text-center" style="top: ${topPx}px; height: 60px;"><span>${startStr}</span><span class="opacity-30">|</span><span>${endStr}</span></div>`;
-                    
-                    // Grid background Line
                     gridLinesHtml += `<div class="absolute w-full border-b border-slate-700/50 pointer-events-none" style="top: ${topPx}px; height: 60px;"></div>`;
                 }
             }
@@ -816,26 +916,22 @@
             timeCol.innerHTML = timeHtml;
             tasksArea.innerHTML = gridLinesHtml;
 
-            // Render Daily Blocks
             weekOrder.forEach((dayIndex, colIdx) => {
                 const dayData = scheduleData[dayIndex];
-                
                 let colHtml = `<div class="relative border-r border-slate-700/50 h-full" style="grid-column: ${colIdx + 1};">`;
                 
-                dayData.forEach(session => {
+                dayData.forEach((session, sessionIndex) => {
                     const startMins = timeToMins(session.start);
                     const endMins = timeToMins(session.end);
                     
                     const topPx = (startMins - 240) * 2; 
                     const heightPx = (endMins - startMins) * 2;
-                    
-                    // Reverted back to the vivid colorful category types instead of neutral colors
                     const typeClass = `type-${session.type} shadow hover:brightness-110`;
                     
                     colHtml += `
                         <div class="absolute w-[calc(100%-4px)] ml-[2px] p-1 md:p-2 rounded-r flex flex-col justify-between transition cursor-pointer z-10 ${typeClass}" 
                              style="top: ${topPx + 1}px; height: ${heightPx - 2}px;"
-                             onclick="alert('Task: ${session.title}\\nTime: ${session.start} - ${session.end}\\nGoals: ${session.goals}')">
+                             onclick="openEditModal(${dayIndex}, ${sessionIndex})">
                             <div class="flex-1 flex items-center justify-center overflow-hidden w-full">
                                 <span class="text-[11px] md:text-[13px] font-bold leading-tight text-center text-white drop-shadow-md px-1">${session.title}</span>
                             </div>
@@ -851,11 +947,173 @@
             });
         }
 
-        // --- SCHEDULING & ALERTS ---
+        // --- EDIT & SAVE SCHEDULE LOGIC ---
         
-        // PWA Robust Notification Dispatcher
-        function sendAppNotification(title, options) {
+        function saveSchedule() {
+            // Sort sessions by start time for every day
+            for (let day in scheduleData) {
+                scheduleData[day].sort((a, b) => timeToMins(a.start) - timeToMins(b.start));
+            }
+            // Save to localStorage
+            localStorage.setItem('nadjibullahScheduleV1', JSON.stringify(scheduleData));
+            
+            // Re-render UI
+            renderTimeline();
+            const currentWeek = getCurrentWeekNumber();
+            setWeek(currentWeek);
+            checkSchedule();
+            
+            // Re-schedule future notifications using the updated data
+            if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+                navigator.serviceWorker.getRegistration().then(reg => {
+                    if (reg) scheduleFutureNotifications(reg);
+                });
+            }
+        }
+
+        function openEditModal(day, index) {
+            editingDay = day;
+            editingIndex = index;
+            const session = scheduleData[day][index];
+            
+            document.getElementById('edit-session-title').innerText = "Edit Session";
+            document.getElementById('edit-day-container').classList.add('hidden');
+            
+            document.getElementById('edit-title').value = session.title;
+            document.getElementById('edit-start').value = session.start;
+            document.getElementById('edit-end').value = session.end;
+            document.getElementById('edit-type').value = session.type;
+            document.getElementById('edit-goals').value = session.goals || '';
+            document.getElementById('edit-impact').value = session.impact || '';
+            document.getElementById('edit-missImpact').value = session.missImpact || '';
+            document.getElementById('edit-quote').value = session.quote || '';
+            
+            document.getElementById('btn-delete-session').classList.remove('hidden');
+            document.getElementById('edit-session-modal').classList.remove('hidden');
+        }
+
+        function openAddModal(defaultDay = null) {
+            editingDay = null;
+            editingIndex = null;
+            
+            document.getElementById('edit-session-title').innerText = "Add New Session";
+            document.getElementById('edit-day-container').classList.remove('hidden');
+            
+            const daySelect = document.getElementById('edit-day');
+            daySelect.value = defaultDay !== null ? defaultDay : new Date().getDay();
+            
+            document.getElementById('edit-title').value = '';
+            document.getElementById('edit-start').value = '12:00';
+            document.getElementById('edit-end').value = '13:00';
+            document.getElementById('edit-type').value = 'general';
+            document.getElementById('edit-goals').value = '';
+            document.getElementById('edit-impact').value = '';
+            document.getElementById('edit-missImpact').value = '';
+            document.getElementById('edit-quote').value = '';
+            
+            document.getElementById('btn-delete-session').classList.add('hidden');
+            document.getElementById('edit-session-modal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-session-modal').classList.add('hidden');
+        }
+
+        function saveSession() {
+            const title = document.getElementById('edit-title').value || 'Untitled';
+            const start = document.getElementById('edit-start').value || '00:00';
+            const end = document.getElementById('edit-end').value || '00:30';
+            const type = document.getElementById('edit-type').value;
+            const goals = document.getElementById('edit-goals').value;
+            const impact = document.getElementById('edit-impact').value;
+            const missImpact = document.getElementById('edit-missImpact').value;
+            const quote = document.getElementById('edit-quote').value;
+            
+            const newSession = { title, start, end, type, goals, impact, missImpact, quote };
+
+            if (editingIndex !== null && editingDay !== null) {
+                // Modifying existing
+                scheduleData[editingDay][editingIndex] = newSession;
+            } else {
+                // Adding new
+                const day = parseInt(document.getElementById('edit-day').value);
+                scheduleData[day].push(newSession);
+            }
+            
+            saveSchedule();
+            closeEditModal();
+        }
+
+        function deleteSession() {
+            if (editingIndex !== null && editingDay !== null) {
+                if (confirm('Are you sure you want to delete this session?')) {
+                    scheduleData[editingDay].splice(editingIndex, 1);
+                    saveSchedule();
+                    closeEditModal();
+                }
+            }
+        }
+
+
+        // --- BACKGROUND NOTIFICATION SCHEDULING ---
+        
+        // This function leverages the new 'Notification Triggers API' on Android Chrome
+        // It pre-schedules notifications to OS level so they fire even when the browser is closed.
+        async function scheduleFutureNotifications(registration) {
+            if (!('showTrigger' in Notification.prototype)) {
+                // Not supported (iPhone or older Android). Must rely on keeping app awake.
+                return;
+            }
+
+            const todaySchedule = getTodaySchedule();
+            const now = new Date();
+            let scheduledCount = 0;
+            
+            // To prevent empty notifications, we use a reliable external icon URL
+            // because relative Blob URLs fail in background service workers.
+            const iconUrl = "https://cdn-icons-png.flaticon.com/512/3233/3233483.png"; 
+
+            for (const session of todaySchedule) {
+                const [startH, startM] = session.start.split(':').map(Number);
+                const startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startH, startM, 0);
+                
+                // Only schedule upcoming events
+                if (startTime > now) {
+                    try {
+                        await registration.showNotification("START: " + session.title, {
+                            body: session.goals + "\nTap to open dashboard.",
+                            icon: iconUrl,
+                            badge: iconUrl,
+                            vibrate: [200, 100, 200],
+                            requireInteraction: true,
+                            tag: 'start-' + session.start,
+                            showTrigger: new TimestampTrigger(startTime.getTime())
+                        });
+                        scheduledCount++;
+                    } catch (e) {
+                        console.error("Trigger schedule failed", e);
+                    }
+                }
+            }
+            
+            if (scheduledCount > 0) {
+                document.getElementById('sync-status').classList.remove('hidden');
+            }
+        }
+
+        // Dispatch normal foreground notification
+        function sendAppNotification(title, bodyText, tag) {
             if (Notification.permission === "granted") {
+                const iconUrl = "https://cdn-icons-png.flaticon.com/512/3233/3233483.png";
+                const options = {
+                    body: bodyText,
+                    icon: iconUrl,
+                    badge: iconUrl,
+                    vibrate: [200, 100, 200],
+                    requireInteraction: true,
+                    tag: tag
+                };
+
                 if (navigator.serviceWorker) {
                     navigator.serviceWorker.getRegistration().then(reg => {
                         if (reg && reg.showNotification) {
@@ -888,7 +1146,6 @@
                 if (currentMins === sEnd) justEndedSession = session;
             }
 
-            // Update Current Status UI
             if (currentSession) {
                 document.getElementById('current-session-card').innerHTML = `
                     <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl"></div>
@@ -966,17 +1223,13 @@
                 
                 if(isMobile) {
                     if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
-                    // Play start audio if enabled
-                    document.getElementById('audio-start').play().catch(e => console.log("Audio playing requires interaction first."));
+                    document.getElementById('audio-start').play().catch(()=>{});
                 }
                 
-                // Advanced PWA / Web Push Call
-                sendAppNotification("Started: " + session.title, { 
-                    body: session.goals, 
-                    icon: 'apple-touch-icon.png',
-                    badge: 'favicon-32x32.png',
-                    vibrate: [200, 100, 200]
-                });
+                // Only send live alert if we aren't using Triggers to prevent duplicates
+                if (!('showTrigger' in Notification.prototype)) {
+                    sendAppNotification("Started: " + session.title, session.goals, "start-" + session.start);
+                }
                 
             } else { // END
                 headline.innerText = "Session Ended";
@@ -984,7 +1237,6 @@
                 iconBg.className = "w-14 h-14 shrink-0 rounded-full flex items-center justify-center text-2xl mr-4 shadow-lg bg-warning/20 text-warning";
                 icon.className = "fas fa-flag-checkered";
                 
-                // Show specific tracker based on type
                 document.getElementById('tracking-section').classList.remove('hidden');
                 document.getElementById('track-faceless').classList.add('hidden');
                 document.getElementById('track-quran').classList.add('hidden');
@@ -1008,16 +1260,10 @@
 
                 if(isMobile) {
                     if ("vibrate" in navigator) navigator.vibrate([500, 200, 500]);
-                    document.getElementById('audio-end').play().catch(e => console.log("Audio playing requires interaction first."));
+                    document.getElementById('audio-end').play().catch(()=>{});
                 }
                 
-                // Advanced PWA / Web Push Call
-                sendAppNotification("Ended: " + session.title, { 
-                    body: "Confirm your performance tracking.", 
-                    icon: 'apple-touch-icon.png',
-                    badge: 'favicon-32x32.png',
-                    vibrate: [500, 200, 500] 
-                });
+                sendAppNotification("Ended: " + session.title, "Confirm your performance tracking.", "end-" + session.end);
             }
             modal.classList.remove('hidden');
         }
@@ -1027,7 +1273,6 @@
         }
 
         // --- SPECIFIC PERFORMANCE RECORDING ---
-
         function recordFaceless(success) {
             if (success) {
                 stats.faceless.weekCompletedDays++;
@@ -1040,11 +1285,9 @@
 
         function recordQuran() {
             const percentStr = document.getElementById('quran-slider').value;
-            const percentage = parseInt(percentStr, 10) / 100; // 0.0 to 1.0 page
-            
+            const percentage = parseInt(percentStr, 10) / 100;
             stats.quran.weekPages += percentage;
             stats.quran.overallPages += percentage;
-            
             saveStats();
             closeModal();
             alert(`Saved! You added ${percentage} pages.`);
@@ -1063,29 +1306,36 @@
         function updateProgressUI() {
             const currWeek = getCurrentWeekNumber();
             
-            // Faceless (7 days week, 42 days overall)
             document.getElementById('lbl-f-week').innerText = `${stats.faceless.weekCompletedDays}/7 Days`;
             document.getElementById('bar-f-week').style.width = `${(stats.faceless.weekCompletedDays / 7) * 100}%`;
             document.getElementById('lbl-f-all').innerText = `${stats.faceless.overallCompleted}/42 Days`;
             document.getElementById('bar-f-all').style.width = `${(stats.faceless.overallCompleted / 42) * 100}%`;
 
-            // Quran (Week 1-4 = 5 pages, Week 5-6 = 12 pages)
             const weekTarget = currWeek <= 4 ? 5 : 12;
             document.getElementById('lbl-q-week').innerText = `${stats.quran.weekPages.toFixed(1)} / ${weekTarget} pgs`;
             document.getElementById('bar-q-week').style.width = `${Math.min(100, (stats.quran.weekPages / weekTarget) * 100)}%`;
-            
             document.getElementById('lbl-q-all').innerText = `${stats.quran.overallPages.toFixed(1)} / 44 pgs`;
             document.getElementById('bar-q-all').style.width = `${Math.min(100, (stats.quran.overallPages / 44) * 100)}%`;
 
-            // FYP (Overall 6 milestones)
             document.getElementById('fyp-current-goal-text').innerText = fypMilestones[currWeek];
             const fypCompleted = stats.fyp.milestones.filter(m => m).length;
             document.getElementById('lbl-fyp-all').innerText = `${fypCompleted}/6`;
             document.getElementById('bar-fyp-all').style.width = `${(fypCompleted / 6) * 100}%`;
         }
 
+        async function activateWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock is active! Screen will stay on.');
+                }
+            } catch (err) {
+                console.log(`Wake Lock error: ${err.name}, ${err.message}`);
+            }
+        }
+
         function requestNotificationPermission() {
-            // Unlock Mobile Audio engine quietly
+            // Unlock Mobile Audio engine
             document.getElementById('audio-start').play().catch(()=>{});
             document.getElementById('audio-start').pause();
             document.getElementById('audio-start').currentTime = 0;
@@ -1093,15 +1343,32 @@
             document.getElementById('audio-end').play().catch(()=>{});
             document.getElementById('audio-end').pause();
             document.getElementById('audio-end').currentTime = 0;
+            
+            // Try keeping screen active if user wants to leave phone on desk
+            activateWakeLock();
 
             if (!("Notification" in window)) {
-                alert("This browser does not support desktop or mobile notifications.");
+                alert("This browser does not support notifications.");
             } else if (Notification.permission === "granted") {
-                alert("Alerts are active! For phones: To receive notifications seamlessly, please 'Add to Home Screen' (Install App).");
+                if (navigator.serviceWorker) {
+                    navigator.serviceWorker.getRegistration().then(reg => {
+                        if (reg) scheduleFutureNotifications(reg);
+                    });
+                }
+                alert("Alerts are active! Remember to 'Install App' (Add to Home Screen) for best background delivery.");
             } else if (Notification.permission !== "denied") {
                 Notification.requestPermission().then(function (permission) {
                     if (permission === "granted") {
-                        alert("Alerts enabled! For phones: 'Add to Home Screen' (Install App) for the best background notification experience.");
+                        if (navigator.serviceWorker) {
+                            navigator.serviceWorker.getRegistration().then(reg => {
+                                if (reg) scheduleFutureNotifications(reg);
+                            });
+                        }
+                        alert("Alerts enabled! Important: Please 'Add to Home Screen' to ensure they fire.");
+                        const btn = document.getElementById('alert-btn');
+                        btn.classList.add('bg-emerald-600/20', 'text-emerald-400', 'border-emerald-500/30');
+                        btn.classList.remove('bg-indigo-600/20', 'text-indigo-400');
+                        btn.innerHTML = `<i class="fas fa-check-double mr-1 md:mr-2"></i> <span class="hidden sm:inline">Alerts Active</span><span class="sm:hidden">Active</span>`;
                     }
                 });
             }
